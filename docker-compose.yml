@@ -1,0 +1,45 @@
+nginx:
+    image: nginx
+    ports:
+        - "80:80"
+    links:
+        - phpfpm
+    volumes:
+        - .\nginx\empresa.conf:/etc/nginx/conf.d/default.conf
+        - .\nginx\logs\nginx-error.log:/var/log/nginx/error.log
+        - .\nginx\logs\nginx-access.log:/var/log/nginx/access.log
+        - .\html\index.html:/usr/share/nginx/html/index.html
+    container_name: nginx
+    restart: always
+
+phpfpm:
+    image: php:fpm
+    links:
+        - mysql
+    ports:
+        - "9000:9000"
+    volumes:
+        - ./html:/usr/share/nginx/html
+        - ./config/php/php.ini:/usr/local/etc/php-fpm.d/php.ini
+    container_name: phpfpm
+
+mysql:
+    image: mariadb
+    volumes:
+      - "./config/database:/var/lib/mysql"
+    environment:
+        MYSQL_ROOT_PASSWORD: admin
+    container_name: mysql
+
+phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    links:
+        - mysql
+    ports:
+        - 8183:80
+    environment:
+        MYSQL_USERNAME: admin
+        MYSQL_ROOT_PASSWORD: admin
+        PMA_ARBITRARY: 1
+    container_name: phpmyadmin
+    restart: always
